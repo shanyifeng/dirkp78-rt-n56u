@@ -400,7 +400,9 @@ else
 fi
 ############################# XFRM ####################################
 if [ "$CONFIG_FIRMWARE_INCLUDE_SSWAN" = "y" ] ; then
-	CONFIG_FIRMWARE_INCLUDE_XFRM=y
+	export CONFIG_FIRMWARE_INCLUDE_XFRM=y
+else
+	unset CONFIG_FIRMWARE_INCLUDE_XFRM
 fi
 if [ "$CONFIG_PRODUCT" = "MT7621" -a "$CONFIG_FIRMWARE_INCLUDE_XFRM" != "y" ] ; then
 	func_disable_kernel_param "CONFIG_XFRM"
