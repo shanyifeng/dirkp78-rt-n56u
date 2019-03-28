@@ -522,6 +522,11 @@ void run_samba(void)
 
 	config_smb_fastpath(0);
 
+	// create link to new /smbconf, if exist
+	if (access("/opt/etc/smb.conf", F_OK) != -1) {
+		doSystem("ln -sf %s %s", "/opt/etc/smb.conf", "/etc/smb.conf");
+	}
+
 	if (has_nmbd)
 		doSystem("killall %s %s", "-SIGHUP", "nmbd");
 	else
