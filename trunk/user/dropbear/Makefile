@@ -1,4 +1,7 @@
-SRC_NAME=dropbear-201X.XX
+SRC_NAME=dropbear-2019.78
+SRC_ARCHIVE=$(SRC_NAME).tar.bz2
+SRC_URI=https://matt.ucc.asn.au/dropbear/releases/$(SRC_ARCHIVE)
+MD5_SUM=a972c85ed678ad0fdcb7844e1294fb54
 
 ifeq ($(CONFIG_FIRMWARE_INCLUDE_SFTP),y)
 COPT=-DSFTPSERVER_PATH=\"/usr/libexec/sftp-server\"
@@ -11,8 +14,10 @@ endif
 CFLAGS+=$(COPT) -ffunction-sections -fdata-sections
 LDFLAGS += -Wl,--gc-sections
 
-all: config_test
+all: prepare_sources config_test
 	$(MAKE) -C $(SRC_NAME) PROGRAMS="dropbear dbclient dropbearkey dropbearconvert scp" MULTI=1
+
+include $(EXTERNAL_SOURCES)
 
 config_test:
 	( if [ -f ./config_done ]; then \
@@ -33,7 +38,8 @@ configure:
 		--disable-loginfunc \
 		--disable-pututline \
 		--disable-pututxline \
-		--enable-zlib \
+		--disable-harden \
+		--with-zlib=$(STAGEDIR) \
 		--enable-bundled-libtom \
 		--host=$(HOST_TARGET) \
 		--build=$(HOST_BUILD) ; \

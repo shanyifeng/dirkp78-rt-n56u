@@ -1,0 +1,266 @@
+diff -Naur dropbear-2019.78/cli-main.c dropbear-2019.78/cli-main.c
+--- dropbear-2019.78/cli-main.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/cli-main.c	2019-04-09 12:48:09.147062087 +0200
+@@ -86,7 +86,7 @@
+ 	} else
+ #endif
+ 	{
+-		progress = connect_remote(cli_opts.remotehost, cli_opts.remoteport, 
++		progress = connect_remote(cli_opts.ipfamily, cli_opts.remotehost, cli_opts.remoteport, 
+ 			cli_connected, &ses, cli_opts.bind_address, cli_opts.bind_port);
+ 		sock_in = sock_out = -1;
+ 	}
+diff -Naur dropbear-2019.78/cli-runopts.c dropbear-2019.78/cli-runopts.c
+--- dropbear-2019.78/cli-runopts.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/cli-runopts.c	2019-04-09 12:50:15.718088823 +0200
+@@ -56,6 +56,9 @@
+ #else
+ 					"Usage: %s [options] [user@]host[/port] [command]\n"
+ #endif
++#if defined AF_INET6 && AF_INET6 < AF_MAX
++					"-4,-6 Explicitly force IPv4 or IPv6 usage\n"
++#endif
+ 					"-p <remoteport>\n"
+ 					"-l <username>\n"
+ 					"-t    Allocate a pty\n"
+@@ -179,10 +182,7 @@
+ #ifndef DISABLE_SYSLOG
+ 	opts.usingsyslog = 0;
+ #endif
+-	/* not yet
+-	opts.ipv4 = 1;
+-	opts.ipv6 = 1;
+-	*/
++	cli_opts.ipfamily = AF_UNSPEC;
+ 	opts.recv_window = DEFAULT_RECV_WINDOW;
+ 	opts.keepalive_secs = DEFAULT_KEEPALIVE;
+ 	opts.idle_timeout_secs = DEFAULT_IDLE_TIMEOUT;
+@@ -213,6 +213,14 @@
+ 					}
+ 					cli_opts.always_accept_key = 1;
+ 					break;
++#if defined AF_INET6 && AF_INET6 < AF_MAX
++				case '4':
++					cli_opts.ipfamily = AF_INET;
++					break;
++				case '6':
++					cli_opts.ipfamily = AF_INET6;
++					break;
++#endif
+ 				case 'p': /* remoteport */
+ 					next = (char**)&cli_opts.remoteport;
+ 					break;
+diff -Naur dropbear-2019.78/cli-tcpfwd.c dropbear-2019.78/cli-tcpfwd.c
+--- dropbear-2019.78/cli-tcpfwd.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/cli-tcpfwd.c	2019-04-09 12:52:53.607078121 +0200
+@@ -275,7 +275,7 @@
+ 	}
+ 	
+ 	snprintf(portstring, sizeof(portstring), "%u", fwd->connectport);
+-	channel->conn_pending = connect_remote(fwd->connectaddr, portstring, channel_connect_done, channel, NULL, NULL);
++	channel->conn_pending = connect_remote(AF_UNSPEC, fwd->connectaddr, portstring, channel_connect_done, channel, NULL, NULL);
+ 
+ 	channel->prio = DROPBEAR_CHANNEL_PRIO_UNKNOWABLE;
+ 	
+diff -Naur dropbear-2019.78/netio.c dropbear-2019.78/netio.c
+--- dropbear-2019.78/netio.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/netio.c	2019-04-09 12:56:45.766260198 +0200
+@@ -171,7 +171,7 @@
+ }
+ 
+ /* Connect via TCP to a host. */
+-struct dropbear_progress_connection *connect_remote(const char* remotehost, const char* remoteport,
++struct dropbear_progress_connection *connect_remote(int family, const char* remotehost, const char* remoteport,
+ 	connect_callback cb, void* cb_data, 
+ 	const char* bind_address, const char* bind_port)
+ {
+@@ -190,7 +190,7 @@
+ 
+ 	memset(&hints, 0, sizeof(hints));
+ 	hints.ai_socktype = SOCK_STREAM;
+-	hints.ai_family = AF_UNSPEC;
++	hints.ai_family = family;
+ 
+ 	err = getaddrinfo(remotehost, remoteport, &hints, &c->res);
+ 	if (err) {
+@@ -442,7 +442,7 @@
+  * Returns the number of sockets bound on success, or -1 on failure. On
+  * failure, if errstring wasn't NULL, it'll be a newly malloced error
+  * string.*/
+-int dropbear_listen(const char* address, const char* port,
++int dropbear_listen(int family, const char* address, const char* port,
+ 		int *socks, unsigned int sockcount, char **errstring, int *maxfd) {
+ 
+ 	struct addrinfo hints, *res = NULL, *res0 = NULL;
+@@ -455,7 +455,7 @@
+ 	TRACE(("enter dropbear_listen"))
+ 	
+ 	memset(&hints, 0, sizeof(hints));
+-	hints.ai_family = AF_UNSPEC; /* TODO: let them flag v4 only etc */
++	hints.ai_family = family;
+ 	hints.ai_socktype = SOCK_STREAM;
+ 
+ 	/* for calling getaddrinfo:
+diff -Naur dropbear-2019.78/netio.h dropbear-2019.78/netio.h
+--- dropbear-2019.78/netio.h	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/netio.h	2019-04-09 12:57:43.573351867 +0200
+@@ -19,7 +19,7 @@
+ 		char **remote_host, char **remote_port, int host_lookup);
+ void getaddrstring(struct sockaddr_storage* addr, 
+ 		char **ret_host, char **ret_port, int host_lookup);
+-int dropbear_listen(const char* address, const char* port,
++int dropbear_listen(int family, const char* address, const char* port,
+ 		int *socks, unsigned int sockcount, char **errstring, int *maxfd);
+ 
+ struct dropbear_progress_connection;
+@@ -29,7 +29,7 @@
+ typedef void(*connect_callback)(int result, int sock, void* data, const char* errstring);
+ 
+ /* Always returns a progress connection, if it fails it will call the callback at a later point */
+-struct dropbear_progress_connection * connect_remote (const char* remotehost, const char* remoteport,
++struct dropbear_progress_connection * connect_remote (int family, const char* remotehost, const char* remoteport,
+ 	connect_callback cb, void *cb_data, const char* bind_address, const char* bind_port);
+ 
+ /* Sets up for select() */
+diff -Naur dropbear-2019.78/runopts.h dropbear-2019.78/runopts.h
+--- dropbear-2019.78/runopts.h	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/runopts.h	2019-04-09 13:33:56.900609295 +0200
+@@ -80,11 +80,8 @@
+ 
+ 	int inetdmode;
+ 
+-	/* Flags indicating whether to use ipv4 and ipv6 */
+-	/* not used yet
+-	int ipv4;
+-	int ipv6;
+-	*/
++	/* ip protocol family to use */
++	int ipfamily;
+ 
+ #if DO_MOTD
+ 	/* whether to print the MOTD */
+@@ -135,6 +132,10 @@
+ typedef struct cli_runopts {
+ 
+ 	char *progname;
++
++	/* ip protocol family to use */
++	int ipfamily;
++
+ 	char *remotehost;
+ 	const char *remoteport;
+ 
+diff -Naur dropbear-2019.78/svr-main.c dropbear-2019.78/svr-main.c
+--- dropbear-2019.78/svr-main.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/svr-main.c	2019-04-09 13:34:40.939116541 +0200
+@@ -422,7 +422,7 @@
+ 
+ 		TRACE(("listening on '%s:%s'", svr_opts.addresses[i], svr_opts.ports[i]))
+ 
+-		nsock = dropbear_listen(svr_opts.addresses[i], svr_opts.ports[i], &socks[sockpos], 
++		nsock = dropbear_listen(svr_opts.ipfamily, svr_opts.addresses[i], svr_opts.ports[i], &socks[sockpos], 
+ 				sockcount - sockpos,
+ 				&errstring, maxfd);
+ 
+diff -Naur dropbear-2019.78/svr-runopts.c dropbear-2019.78/svr-runopts.c
+--- dropbear-2019.78/svr-runopts.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/svr-runopts.c	2019-04-09 13:36:23.254628350 +0200
+@@ -87,6 +87,9 @@
+ 					"-a		Allow connections to forwarded ports from any host\n"
+ 					"-c command	Force executed command\n"
+ #endif
++#if defined AF_INET6 && AF_INET6 < AF_MAX
++					"-4,-6		Explicitly force IPv4 or IPv6 usage\n"
++#endif
+ 					"-p [address:]port\n"
+ 					"		Listen on specified tcp port (and optionally address),\n"
+ 					"		up to %d can be specified\n"
+@@ -161,16 +164,13 @@
+ 	opts.compress_mode = DROPBEAR_COMPRESS_DELAYED;
+ #endif 
+ 
+-	/* not yet
+-	opts.ipv4 = 1;
+-	opts.ipv6 = 1;
+-	*/
+ #if DO_MOTD
+ 	svr_opts.domotd = 1;
+ #endif
+ #ifndef DISABLE_SYSLOG
+ 	opts.usingsyslog = 1;
+ #endif
++	svr_opts.ipfamily = AF_UNSPEC;
+ 	opts.recv_window = DEFAULT_RECV_WINDOW;
+ 	opts.keepalive_secs = DEFAULT_KEEPALIVE;
+ 	opts.idle_timeout_secs = DEFAULT_IDLE_TIMEOUT;
+@@ -224,6 +224,14 @@
+ 					svr_opts.inetdmode = 1;
+ 					break;
+ #endif
++#if defined AF_INET6 && AF_INET6 < AF_MAX
++				case '4':
++					svr_opts.ipfamily = AF_INET;
++					break;
++				case '6':
++					svr_opts.ipfamily = AF_INET6;
++					break;
++#endif
+ 				case 'p':
+ 				  nextisport = 1;
+ 				  break;
+diff -Naur dropbear-2019.78/svr-tcpfwd.c dropbear-2019.78/svr-tcpfwd.c
+--- dropbear-2019.78/svr-tcpfwd.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/svr-tcpfwd.c	2019-04-09 13:38:36.264957221 +0200
+@@ -285,7 +285,7 @@
+ 	}
+ 
+ 	snprintf(portstring, sizeof(portstring), "%u", destport);
+-	channel->conn_pending = connect_remote(desthost, portstring, channel_connect_done, channel, NULL, NULL);
++	channel->conn_pending = connect_remote(AF_UNSPEC, desthost, portstring, channel_connect_done, channel, NULL, NULL);
+ 
+ 	channel->prio = DROPBEAR_CHANNEL_PRIO_UNKNOWABLE;
+ 	
+diff -Naur dropbear-2019.78/tcp-accept.c dropbear-2019.78/tcp-accept.c
+--- dropbear-2019.78/tcp-accept.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/tcp-accept.c	2019-04-09 13:39:16.932333433 +0200
+@@ -123,7 +123,7 @@
+ 	/* first we try to bind, so don't need to do so much cleanup on failure */
+ 	snprintf(portstring, sizeof(portstring), "%u", tcpinfo->listenport);
+ 
+-	nsocks = dropbear_listen(tcpinfo->listenaddr, portstring, socks, 
++	nsocks = dropbear_listen(AF_UNSPEC, tcpinfo->listenaddr, portstring, socks, 
+ 			DROPBEAR_MAX_SOCKS, &errstring, &ses.maxfd);
+ 	if (nsocks < 0) {
+ 		dropbear_log(LOG_INFO, "TCP forward failed: %s", errstring);
+diff --git a/trunk/user/dropbear/patches/0002-small-improvements.patch b/trunk/user/dropbear/patches/0002-small-improvements.patch
+new file mode 100644
+index 000000000..b8e83a20e
+--- /dev/null
+++ b/trunk/user/dropbear/patches/0002-small-improvements.patch
+@@ -0,0 +1,25 @@
+diff -Naur dropbear-2019.78.orig/signkey.c dropbear-2019.78/signkey.c
+--- dropbear-2019.78.orig/signkey.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/signkey.c	2019-04-09 13:51:12.894346781 +0200
+@@ -414,7 +414,8 @@
+ 	/* skip the size int of the string - this is a bit messy */
+ 	md5_process(&hs, keyblob, keybloblen);
+ 
+-	md5_done(&hs, hash);
++	if (md5_done(&hs, hash) != CRYPT_OK)
++		return NULL;
+ 
+ 	/* "md5 hexfingerprinthere\0", each hex digit is "AB:" etc */
+ 	buflen = 4 + 3*MD5_HASH_SIZE;
+diff -Naur dropbear-2019.78/svr-main.c dropbear-2019.78/svr-main.c
+--- dropbear-2019.78/svr-main.c	2019-03-27 15:15:23.000000000 +0100
++++ dropbear-2019.78/svr-main.c	2019-04-09 13:51:43.143801515 +0200
+@@ -126,6 +126,8 @@
+ 	int childsock;
+ 	int childpipe[2];
+ 
++	memset(listensocks, 0, sizeof(listensocks));
++
+ 	/* Note: commonsetup() must happen before we daemon()ise. Otherwise
+ 	   daemon() will chdir("/"), and we won't be able to find local-dir
+ 	   hostkeys. */
+
