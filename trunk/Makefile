@@ -27,23 +27,24 @@ endif
 # Get the core stuff worked out
 #
 
-ROOTDIR        = $(shell pwd)
-HOSTCC         = gcc
-ROMFSINST      = $(ROOTDIR)/tools/romfs-inst.sh
-TFTPDIR        = /tftpboot
-PATH          := $(PATH):$(ROOTDIR)/tools
+ROOTDIR          = $(shell pwd)
+HOSTCC           = gcc
+ROMFSINST        = $(ROOTDIR)/tools/romfs-inst.sh
+TFTPDIR          = /tftpboot
+PATH            := $(PATH):$(ROOTDIR)/tools
 
-VERSIONSTR     = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
+VERSIONSTR       = $(CONFIG_VENDOR)/$(CONFIG_PRODUCT) Version $(VERSIONPKG)
 
-LINUXDIR       = $(CONFIG_LINUXDIR)
-LINUXINCDIR    = $(ROOTDIR)/$(LINUXDIR)/include
-IMAGEDIR       = $(ROOTDIR)/images
-ROMFSDIR       = $(ROOTDIR)/romfs
-STAGEDIR       = $(ROOTDIR)/stage
-SCRIPTSDIR     = $(ROOTDIR)/config/scripts
-LINUX_CONFIG   = $(ROOTDIR)/$(LINUXDIR)/.config
-PROJECT_CONFIG = $(ROOTDIR)/.config
-SSTRIP_TOOL    = $(if $(CONFIG_FIRMWARE_PERFORM_SSTRIP),$(ROOTDIR)/tools/sstrip/sstrip)
+LINUXDIR         = $(CONFIG_LINUXDIR)
+LINUXINCDIR      = $(ROOTDIR)/$(LINUXDIR)/include
+IMAGEDIR         = $(ROOTDIR)/images
+ROMFSDIR         = $(ROOTDIR)/romfs
+STAGEDIR         = $(ROOTDIR)/stage
+SCRIPTSDIR       = $(ROOTDIR)/config/scripts
+LINUX_CONFIG     = $(ROOTDIR)/$(LINUXDIR)/.config
+PROJECT_CONFIG   = $(ROOTDIR)/.config
+SSTRIP_TOOL      = $(if $(CONFIG_FIRMWARE_PERFORM_SSTRIP),$(ROOTDIR)/tools/sstrip/sstrip)
+EXTERNAL_SOURCES = $(ROOTDIR)/externals.mk
 
 #NUM MAKE PROCESS = CPU NUMBER IN THE SYSTEM * CPU_OVERLOAD
 CPU_OVERLOAD	= 1
