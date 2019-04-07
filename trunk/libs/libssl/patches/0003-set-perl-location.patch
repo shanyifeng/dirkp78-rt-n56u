@@ -1,0 +1,73 @@
+diff -Naur openssl-1.0.2r/Configure openssl-1.0.2r/Configure
+--- openssl-1.0.2r/Configure	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/Configure	2019-04-03 22:43:23.889466723 +0200
+@@ -1,4 +1,5 @@
+-:
++#!/usr/bin/perl
++
+ eval 'exec perl -S $0 ${1+"$@"}'
+     if $running_under_some_shell;
+ ##
+diff -Naur openssl-1.0.2r/util/clean-depend.pl openssl-1.0.2r/util/clean-depend.pl
+--- openssl-1.0.2r/util/clean-depend.pl	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/util/clean-depend.pl	2019-04-03 22:45:53.666405209 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl -w
++#!/usr/bin/perl
+ # Clean the dependency list in a makefile of standard includes...
+ # Written by Ben Laurie <ben@algroup.co.uk> 19 Jan 1999
+ 
+diff -Naur openssl-1.0.2r/util/mkdef.pl openssl-1.0.2r/util/mkdef.pl
+--- openssl-1.0.2r/util/mkdef.pl	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/util/mkdef.pl	2019-04-03 22:44:47.241993867 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl -w
++#!/usr/bin/perl
+ #
+ # generate a .def file
+ #
+diff -Naur openssl-1.0.2r/util/mkerr.pl openssl-1.0.2r/util/mkerr.pl
+--- openssl-1.0.2r/util/mkerr.pl	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/util/mkerr.pl	2019-04-03 22:44:30.653889939 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl -w
++#!/usr/bin/perl
+ 
+ my $config = "crypto/err/openssl.ec";
+ my $hprefix = "openssl/";
+diff -Naur openssl-1.0.2r/util/mkstack.pl openssl-1.0.2r/util/mkstack.pl
+--- openssl-1.0.2r/util/mkstack.pl	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/util/mkstack.pl	2019-04-03 22:44:14.925790952 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl -w
++#!/usr/bin/perl
+ 
+ # This is a utility that searches out "DECLARE_STACK_OF()"
+ # declarations in .h and .c files, and updates/creates/replaces
+diff -Naur openssl-1.0.2r/util/pod2man.pl openssl-1.0.2r/util/pod2man.pl
+--- openssl-1.0.2r/util/pod2man.pl	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/util/pod2man.pl	2019-04-03 22:45:39.778319839 +0200
+@@ -1,4 +1,4 @@
+-: #!/usr/bin/perl-5.005
++#!/usr/bin/perl
+     eval 'exec /usr/bin/perl -S $0 ${1+"$@"}'
+ 	if $running_under_some_shell;
+ 
+diff -Naur openssl-1.0.2r/util/selftest.pl openssl-1.0.2r/util/selftest.pl
+--- openssl-1.0.2r/util/selftest.pl	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/util/selftest.pl	2019-04-03 22:45:19.886196981 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl -w
++#!/usr/bin/perl
+ #
+ # Run the test suite and generate a report
+ #
+diff -Naur openssl-1.0.2r/tools/c_rehash.in openssl-1.0.2r/tools/c_rehash.in
+--- openssl-1.0.2r/tools/c_rehash.in	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/tools/c_rehash.in	2019-04-03 22:49:02.279532087 +0200
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl
++#!/usr/bin/perl
+ 
+ # Perl c_rehash script, scan all files in a directory
+ # and add symbolic links to their hash values.

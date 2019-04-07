@@ -1,0 +1,42 @@
+diff -Naur openssl-1.0.2r/Makefile openssl-1.0.2r/Makefile
+--- openssl-1.0.2r/Makefile	2019-02-26 15:20:55.000000000 +0100
++++ openssl-1.0.2r/Makefile	2019-04-03 22:33:21.982904972 +0200
+@@ -139,7 +139,7 @@
+ 
+ BASEADDR=0xFB00000
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl apps
+ ENGDIRS= ccgost
+ SHLIBDIRS= crypto ssl
+ 
+@@ -542,7 +542,7 @@
+ 	@$(MAKE) SDIRS='$(SDIRS)' clean
+ 	@$(MAKE) TAR='$(TAR)' TARFLAGS='$(TARFLAGS)' $(DISTTARVARS) tar
+ 
+-install: all install_docs install_sw
++install: all install_sw
+ 
+ install_sw:
+ 	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \
+diff -Naur openssl-1.0.2r/Makefile.org openssl-1.0.2r/Makefile.org
+--- openssl-1.0.2r/Makefile.org	2019-02-26 15:20:20.000000000 +0100
++++ openssl-1.0.2r/Makefile.org	2019-04-03 22:31:17.170738787 +0200
+@@ -137,7 +137,7 @@
+ 
+ BASEADDR=
+ 
+-DIRS=   crypto ssl engines apps test tools
++DIRS=   crypto ssl apps
+ ENGDIRS= ccgost
+ SHLIBDIRS= crypto ssl
+ 
+@@ -540,7 +540,7 @@
+ 	@$(MAKE) SDIRS='$(SDIRS)' clean
+ 	@$(MAKE) TAR='$(TAR)' TARFLAGS='$(TARFLAGS)' $(DISTTARVARS) tar
+ 
+-install: all install_docs install_sw
++install: all install_sw
+ 
+ install_sw:
+ 	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \

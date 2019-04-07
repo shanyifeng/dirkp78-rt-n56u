@@ -1,4 +1,7 @@
-SRC_NAME=openssl-1.0.2
+SRC_NAME=openssl-1.0.2r
+SRC_ARCHIVE=$(SRC_NAME).tar.gz
+SRC_URI=https://www.openssl.org/source/$(SRC_ARCHIVE)
+MD5_SUM=0d2baaf04c56d542f6cc757b9c2a2aac
 
 # openssl use CROSS_COMPILE prefix
 CC=gcc $(CPUFLAGS)
@@ -31,8 +34,11 @@ ifneq ($(CONFIG_FIRMWARE_INCLUDE_OPENSSL_EC),y)
 OPENSSL_CIPHERS += no-ec
 endif
 
-all: config_test
+all: prepare_sources config_test
+	$(MAKE) depend -C $(SRC_NAME)
 	$(MAKE) -C $(SRC_NAME)
+
+include $(EXTERNAL_SOURCES)
 
 config_test:
 	( if [ -f ./config_done ]; then \
