@@ -17,8 +17,9 @@ Contributors of this project are not responsible for what happens next.
 
 * To be completed
 
-I offer only the Base and a Advanced version for the RT-65U Router. Both version are only english and german Frontend.
+I offer only the Base and an Advanced version for the RT-65U Router. Both version are only english and german Frontend.
 The Advanced version has also syslog and gpart.
+
 [Download the pre-build system image for the RT-65U self compiled with the following news and more:](https://bitbucket.org/dirkp78/update/downloads/)
 feat(ipec-tools): add ipsec-tools 0.8.2
 feat(dropbear): update to version 2019.78
