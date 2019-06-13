@@ -16,3 +16,14 @@ Contributors of this project are not responsible for what happens next.
 ### Contribution guidelines ###
 
 * To be completed
+
+I offer only the Base and a Advanced version for the RT-65U Router. Both version are only english and german Frontend.
+The Advanced version has also syslog and gpart.
+[Download the pre-build system image for the RT-65U self compiled with the following news and more:](https://bitbucket.org/dirkp78/update/downloads/)
+feat(ipec-tools): add ipsec-tools 0.8.2
+feat(dropbear): update to version 2019.78
+feat(lighttpd): add lighttpd 1.4.53
+feat(pcre): add pcre library 8.43
+feat(openssl): update to version 1.0.2r	
+feat(ipsec): enable ipsec kernel modules
+www: Advanced_Console_Content: fix 'ReferenceError: event is not defined'
