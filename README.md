@@ -25,6 +25,6 @@ feat(ipec-tools): add ipsec-tools 0.8.2
 feat(dropbear): update to version 2019.78
 feat(lighttpd): add lighttpd 1.4.53
 feat(pcre): add pcre library 8.43
-feat(openssl): update to version 1.0.2r	
+feat(openssl): update to version 1.0.2r
 feat(ipsec): enable ipsec kernel modules
 www: Advanced_Console_Content: fix 'ReferenceError: event is not defined'
