@@ -31,5 +31,7 @@ www: Advanced_Console_Content: fix 'ReferenceError: event is not defined'
 
 NEW: RT-N65U Kernel 3.4 added
 
-And RT-N56U 3.4.3.9L-100 english and german frontend with syslog and parted
+And RT-N56U 3.4.3.9L-100 english and german frontend. I've tested
 [Changelog and more info](https://github.com/Linaro1985/padavan-ng/compare/v3.4.3.9-100L...master) 
+
+Use at own risk. Benutzung auf eigenes Risiko
